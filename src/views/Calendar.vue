@@ -3,7 +3,8 @@
     <v-col>
       <v-sheet height="64">
         <v-toolbar flat color="white">
-          <v-btn outlined class="mr-4" color="grey darken-2" @click="setToday">
+          <add-event></add-event>
+          <v-btn outlined class="mx-4" color="grey darken-2" @click="setToday">
             Today
           </v-btn>
           <v-btn fab text small color="grey darken-2" @click="prev">
@@ -89,9 +90,12 @@
 
 <script>
 import db from "../main";
-
+import addEventForm from "../components/addEventForm";
 export default {
   name: "Calendar",
+  components: {
+    "add-event": addEventForm
+  },
   data() {
     return {
       today: new Date(
@@ -130,7 +134,9 @@ export default {
   },
   created() {
     console.log("I am in created");
+    this.getEvents()
     console.log(this);
+
   },
   computed: {
     title() {
@@ -171,11 +177,11 @@ export default {
   mounted() {
     console.log("I am in mounted");
     console.log(this);
-    // this.getEvents();
+    // ;
     this.$refs.calendar.checkChange();
   },
   methods: {
-    async getEvents({ start, end }) {
+    getEvents({ start, end }) {
       const self = this;
       let eventsArr = [];
       db.collection("calEvent")
