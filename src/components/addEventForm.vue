@@ -46,7 +46,7 @@
 </template>
 <script>
 import moment from "moment";
-import db from "../main";
+import { calEventsCollection } from "../main";
 export default {
   data() {
     return {
@@ -63,55 +63,32 @@ export default {
       ]
     };
   },
+
   methods: {
     onSaveChanges() {
       if (this.$refs.form.validate()) {
         this.dialog = false; // Add a new document with a generated id.
-        db.collection("calEvent")
-          .add({
-            name: this.name,
-            detail: this.detail,
-            start: this.start,
-            end: this.end,
-            color:
-              "#" +
-              Math.random()
-                .toString(16)
-                .slice(2, 8)
-          })
-          .then(function(docRef) {
+        const newEvent = {
+          name: this.name,
+          detail: this.detail,
+          start: this.start,
+          end: this.end,
+          color:
+            "#" +
+            Math.random()
+              .toString(16)
+              .slice(2, 8)
+        };
+        calEventsCollection
+          .add(newEvent)
+          .then((docRef) => {
             console.log("Document written with ID: ", docRef.id);
-             this.getEvents()
+            this.$emit("addToEvents" , newEvent)
           })
           .catch(function(error) {
-             
             console.error("Error adding document: ", error);
           });
       }
-    },
-    getEvents() {
-      const self = this;
-      let eventsArr = [];
-      db.collection("calEvent")
-        .get()
-        .then(function(querySnapshot) {
-          querySnapshot.forEach(doc => {
-            console.log("doc " + JSON.stringify(doc.data()));
-            eventsArr.push({
-              id: doc.id,
-              color: doc.data().color,
-              details: doc.data().details,
-              end: doc.data().end,
-              name: doc.data().name,
-              start: doc.data().start
-            });
-          });
-        
-          self.events = JSON.parse(JSON.stringify(eventsArr));
-        })
-        .catch(function(error) {
-          console.log("Error getting documents: ", error);
-        });
     }
   }
 };

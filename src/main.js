@@ -7,9 +7,7 @@ import vuetify from './plugins/vuetify';
 // import * as firebase from 'firebase';
 // more specific 
 import firebase from 'firebase/app'
-import 'firebase/firestore'
-
-import TextareaAutosize from 'vue-textarea-autosize'
+import 'firebase/firestore' 
 
 require('dotenv').config() 
 Vue.config.productionTip = false
@@ -27,9 +25,10 @@ firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore()
 export default  db ;
+export const calEventsCollection = db.collection('calEvent');
 
-Vue.use(TextareaAutosize) 
-
+ 
+ 
 new Vue({
   router,
   store,

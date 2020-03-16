@@ -3,7 +3,7 @@
     <v-col>
       <v-sheet height="64">
         <v-toolbar flat color="white">
-          <add-event></add-event>
+          <add-event @addToEvents="addanEventToEvents"></add-event>
           <v-btn outlined class="mx-4" color="grey darken-2" @click="setToday">
             Today
           </v-btn>
@@ -74,7 +74,7 @@
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <span v-html="selectedEvent.details"></span>
+              <span>{{selectedEvent.detail}}</span>
             </v-card-text>
             <v-card-actions>
               <v-btn text color="secondary" @click="selectedOpen = false">
@@ -134,9 +134,8 @@ export default {
   },
   created() {
     console.log("I am in created");
-    this.getEvents()
+    this.getEvents();
     console.log(this);
-
   },
   computed: {
     title() {
@@ -250,6 +249,10 @@ export default {
     },
     rnd(a, b) {
       return Math.floor((b - a + 1) * Math.random()) + a;
+    },
+    addanEventToEvents(e) {
+      console.log("add an event to events " + JSON.stringify(e));
+      this.events.push(e);
     }
   }
 };
