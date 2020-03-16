@@ -74,7 +74,7 @@
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <span>{{selectedEvent.detail}}</span>
+              <span v-html="selectedEvent.detail"> </span>
             </v-card-text>
             <v-card-actions>
               <v-btn text color="secondary" @click="selectedOpen = false">
@@ -191,7 +191,7 @@ export default {
             eventsArr.push({
               id: doc.id,
               color: doc.data().color,
-              details: doc.data().details,
+              detail: doc.data().detail,
               end: doc.data().end,
               name: doc.data().name,
               start: doc.data().start
