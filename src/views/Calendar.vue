@@ -59,7 +59,7 @@
           :activator="selectedElement"
           offset-x
         >
-          <v-card min-width="350px" flat v-show="showOrNot">
+          <v-card min-width="350px" flat>
             <v-toolbar :color="selectedEvent.color" dark>
               <v-btn icon>
                 <v-icon>mdi-pencil</v-icon>
@@ -77,7 +77,12 @@
               <span v-html="selectedEvent.detail"> </span>
             </v-card-text>
             <v-card-actions>
-              <v-btn text color="error" @click="delEvent">Remove</v-btn>
+              <v-btn text color="green" v-on:click="doneEvent">
+                Done
+              </v-btn>
+              <v-btn text color="error" @click="delEvent">
+                Remove
+              </v-btn>
               <v-btn text color="secondary" @click="selectedOpen = false">
                 Cancel
               </v-btn>
@@ -98,8 +103,7 @@ export default {
     "add-event": addEventForm
   },
   data() {
-    return {
-      showOrNot: false,
+    return { 
       today: new Date(
         new Date().getTime() - new Date().getTimezoneOffset() * 60000
       )
@@ -231,8 +235,7 @@ export default {
       console.log(event);
       const open = () => {
         this.selectedEvent = event;
-        this.selectedElement = nativeEvent.target;
-        this.showOrNot = true
+        this.selectedElement = nativeEvent.target; 
         setTimeout(() => (this.selectedOpen = true), 10);
       };
 
@@ -258,22 +261,23 @@ export default {
       this.events.push(e);
     },
     delEvent() {
-  
-      let self = this
-      console.log(self.selectedEvent.id)
+      let self = this;
+      console.log(self.selectedEvent.id);
       db.collection("calEvent")
         .doc(self.selectedEvent.id)
         .delete()
         .then(() => {
           console.log("Document successfully deleted!");
-
-          self.showOrNot = false
-          self.events.splice(self.events.indexOf(self.selectedEvent.id))
-          console.log(self.showOrNot)
+          self.selectedOpen = false
+          self.events.splice(self.events.indexOf(self.selectedEvent.id));
+          
         })
         .catch(function(error) {
           console.error("Error removing document: ", error);
         });
+    },
+    doneEvent(){
+       
     }
   }
 };
