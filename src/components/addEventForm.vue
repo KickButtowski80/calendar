@@ -83,7 +83,7 @@ export default {
           .add(newEvent)
           .then((docRef) => {
             console.log("Document written with ID: ", docRef.id);
-            this.$emit("addToEvents" , newEvent)
+            this.$emit("addToEvents" , {...newEvent, id: docRef.id})
           })
           .catch(function(error) {
             console.error("Error adding document: ", error);

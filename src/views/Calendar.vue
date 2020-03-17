@@ -59,7 +59,7 @@
           :activator="selectedElement"
           offset-x
         >
-          <v-card color="grey lighten-4" min-width="350px" flat>
+          <v-card min-width="350px" flat v-show="showOrNot">
             <v-toolbar :color="selectedEvent.color" dark>
               <v-btn icon>
                 <v-icon>mdi-pencil</v-icon>
@@ -67,7 +67,7 @@
               <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn icon>
-                <v-icon>mdi-heart</v-icon>
+                <v-icon>mdi-heart-outline</v-icon>
               </v-btn>
               <v-btn icon>
                 <v-icon>mdi-dots-vertical</v-icon>
@@ -77,6 +77,7 @@
               <span v-html="selectedEvent.detail"> </span>
             </v-card-text>
             <v-card-actions>
+              <v-btn text color="error" @click="delEvent">Remove</v-btn>
               <v-btn text color="secondary" @click="selectedOpen = false">
                 Cancel
               </v-btn>
@@ -98,6 +99,7 @@ export default {
   },
   data() {
     return {
+      showOrNot: false,
       today: new Date(
         new Date().getTime() - new Date().getTimezoneOffset() * 60000
       )
@@ -230,6 +232,7 @@ export default {
       const open = () => {
         this.selectedEvent = event;
         this.selectedElement = nativeEvent.target;
+        this.showOrNot = true
         setTimeout(() => (this.selectedOpen = true), 10);
       };
 
@@ -253,6 +256,24 @@ export default {
     addanEventToEvents(e) {
       console.log("add an event to events " + JSON.stringify(e));
       this.events.push(e);
+    },
+    delEvent() {
+  
+      let self = this
+      console.log(self.selectedEvent.id)
+      db.collection("calEvent")
+        .doc(self.selectedEvent.id)
+        .delete()
+        .then(() => {
+          console.log("Document successfully deleted!");
+
+          self.showOrNot = false
+          self.events.splice(self.events.indexOf(self.selectedEvent.id))
+          console.log(self.showOrNot)
+        })
+        .catch(function(error) {
+          console.error("Error removing document: ", error);
+        });
     }
   }
 };
