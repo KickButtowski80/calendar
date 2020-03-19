@@ -77,13 +77,14 @@ export default {
             "#" +
             Math.random()
               .toString(16)
-              .slice(2, 8)
+              .slice(2, 8),
+          done: false
         };
         calEventsCollection
           .add(newEvent)
           .then((docRef) => {
             console.log("Document written with ID: ", docRef.id);
-            this.$emit("addToEvents" , {...newEvent, id: docRef.id})
+            this.$emit("addToEvents" , {...newEvent, id: docRef.id, done: false})
           })
           .catch(function(error) {
             console.error("Error adding document: ", error);
@@ -92,4 +93,8 @@ export default {
     }
   }
 };
+
+// function getUniqueListBy(arr, key) {
+//     return [...new Map(arr.map(item => [item[key], item])).values()]
+// }
 </script>

@@ -64,7 +64,10 @@
               <v-btn icon>
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+              <v-toolbar-title
+                v-html="selectedEvent.name"
+                :class="{ done: done }"
+              ></v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn icon>
                 <v-icon>mdi-heart-outline</v-icon>
@@ -74,11 +77,17 @@
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <span v-html="selectedEvent.detail"> </span>
+              <span v-html="selectedEvent.detail" :class="{ done: done }">
+              </span>
             </v-card-text>
             <v-card-actions>
-              <v-btn text color="green" v-on:click="doneEvent">
-                Done
+              <v-btn
+                text
+                color="green"
+                :class="{ done: done }"
+                @click="doneEvent"
+              >
+                {{ done ? "Undone" : "Done" }}
               </v-btn>
               <v-btn text color="error" @click="delEvent">
                 Remove
@@ -103,7 +112,7 @@ export default {
     "add-event": addEventForm
   },
   data() {
-    return { 
+    return {
       today: new Date(
         new Date().getTime() - new Date().getTimezoneOffset() * 60000
       )
@@ -131,7 +140,11 @@ export default {
       selectedElement: null,
       selectedOpen: false, // if the dialog box is open or not
       events: [],
-      dialog: false
+      dialog: false,
+      textDecoration: null,
+      defaultTextDecoration: "none",
+      // defaultCompleteStatus: "Done",
+      done: localStorage.getItem(this.done)
     };
   },
   beforeCreate() {
@@ -180,9 +193,9 @@ export default {
     }
   },
   mounted() {
-    console.log("I am in mounted");
     console.log(this);
-    // ;
+    console.log("I am in mounted");
+
     this.$refs.calendar.checkChange();
   },
   methods: {
@@ -200,7 +213,8 @@ export default {
               detail: doc.data().detail,
               end: doc.data().end,
               name: doc.data().name,
-              start: doc.data().start
+              start: doc.data().start,
+              done: doc.data().done
             });
           });
           console.log("eventsArr array is " + JSON.stringify(eventsArr));
@@ -233,9 +247,10 @@ export default {
       console.log("show event ");
       console.log(nativeEvent);
       console.log(event);
+      this.textDecoration = this.defaultTextDecoration;
       const open = () => {
         this.selectedEvent = event;
-        this.selectedElement = nativeEvent.target; 
+        this.selectedElement = nativeEvent.target;
         setTimeout(() => (this.selectedOpen = true), 10);
       };
 
@@ -263,22 +278,74 @@ export default {
     delEvent() {
       let self = this;
       console.log(self.selectedEvent.id);
+      console.log(this.events);
       db.collection("calEvent")
         .doc(self.selectedEvent.id)
         .delete()
         .then(() => {
           console.log("Document successfully deleted!");
-          self.selectedOpen = false
-          self.events.splice(self.events.indexOf(self.selectedEvent.id));
-          
+          self.selectedOpen = false;
+          self.events.splice(
+            self.events.findIndex(event => event.id === self.selectedEvent.id)
+          );
         })
         .catch(function(error) {
           console.error("Error removing document: ", error);
         });
     },
-    doneEvent(){
-       
+
+    doneEvent() {
+      this.done = !this.done;
+      if (!localStorage.getItem(this.done))
+        localStorage.setItem(this.done, this.done);
+
+      //using strike overlay unicode
+      if (this.done) {
+        this.selectedEvent.name = this.selectedEvent.name
+          .split("")
+          .map(char => char + "\u0335")
+          .join("");
+        this.selectedEvent.detail = this.selectedEvent.detail
+          .split("")
+          .map(char => char + "\u0335")
+          .join("");
+      } else {
+        this.selectedEvent.name = this.selectedEvent.name.replace(
+          /[\u0335]/g,
+          ""
+        );
+        this.selectedEvent.detail = this.selectedEvent.detail.replace(
+          /[\u0335]/g,
+          ""
+        );
+      }
+      console.log("the done event");
+      console.log(this);
+
+      // this.defaultTextDecoration = this.done ? "line-through" : "none";
+      // this.selectedElement.style.textDecoration = this.done
+      //   ? "line-through"
+      //   : "none";
+
+      // if (this.defaultTextDecoration === "none") {
+      //   this.defaultTextDecoration = "line-through";
+      //   this.selectedElement.style.textDecoration = "line-through";
+      //   // this.defaultCompleteStatus = "UnDone";
+      // } else {
+      //   this.defaultTextDecoration = "none";
+      //   this.selectedElement.style.textDecoration = "none";
+      //   // this.defaultCompleteStatus = "Done";
+      // }
     }
+
+    //  pl-1 is name of the class but if you wanna traget them you need to go through some array
+    //  finding all the class pl-1 that has the smae content like "Izak"; -->
   }
 };
 </script>
+
+<style>
+.done {
+  text-decoration: "line-through";
+}
+</style>
