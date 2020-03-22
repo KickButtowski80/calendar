@@ -66,7 +66,11 @@
               </v-btn>
               <v-toolbar-title
                 v-html="selectedEvent.name"
-                :class="{ done: done }"
+                :style="
+                  selectedEvent.done
+                    ? 'text-decoration: line-through'
+                    : 'text-decoration: none'
+                "
               ></v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn icon>
@@ -77,17 +81,20 @@
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <span v-html="selectedEvent.detail" :class="{ done: done }">
+              <span
+                v-html="selectedEvent.detail"
+                :style="
+                  selectedEvent.done
+                    ? 'text-decoration: line-through'
+                    : 'text-decoration: none'
+                "
+              >
+                {{ selectedEvent }}
               </span>
             </v-card-text>
             <v-card-actions>
-              <v-btn
-                text
-                color="green"
-                :class="{ done: done }"
-                @click="doneEvent"
-              >
-                {{ done ? "Undone" : "Done" }}
+              <v-btn text color="green" @click="doneEvent">
+                {{ selectedEvent.done ? "unDone" : "Done" }}
               </v-btn>
               <v-btn text color="error" @click="delEvent">
                 Remove
@@ -106,6 +113,18 @@
 <script>
 import db from "../main";
 import addEventForm from "../components/addEventForm";
+
+function emulateStrikethrough(string, hasStrike) {
+  if (hasStrike) {
+    return string
+      .split("")
+      .map(char => char + "\u0335")
+      .join("");
+  } else {
+    return string.replace(/[\u0335]/g, "");
+  }
+}
+
 export default {
   name: "Calendar",
   components: {
@@ -134,17 +153,13 @@ export default {
       details: null,
       start: null,
       end: null,
-      color: "#1976D2",
+      color: "",
       currentlyEditing: null, //id goes here? what id, we will see
       selectedEvent: {},
       selectedElement: null,
       selectedOpen: false, // if the dialog box is open or not
       events: [],
-      dialog: false,
-      textDecoration: null,
-      defaultTextDecoration: "none",
-      // defaultCompleteStatus: "Done",
-      done: localStorage.getItem(this.done)
+      dialog: false
     };
   },
   beforeCreate() {
@@ -153,7 +168,11 @@ export default {
   },
   created() {
     console.log("I am in created");
-    this.getEvents();
+    console.log(this);
+   },
+  mounted() {
+    console.log("I am in mounted");
+    this.$refs.calendar.checkChange();
     console.log(this);
   },
   computed: {
@@ -192,40 +211,34 @@ export default {
       });
     }
   },
-  mounted() {
-    console.log(this);
-    console.log("I am in mounted");
-
-    this.$refs.calendar.checkChange();
-  },
   methods: {
-    getEvents({ start, end }) {
-      const self = this;
+    async getEvents({ start, end }) {
+      console.log("start date is" + JSON.stringify(start));
       let eventsArr = [];
-      db.collection("calEvent")
-        .get()
-        .then(function(querySnapshot) {
-          querySnapshot.forEach(doc => {
-            console.log("doc " + JSON.stringify(doc.data()));
-            eventsArr.push({
-              id: doc.id,
-              color: doc.data().color,
-              detail: doc.data().detail,
-              end: doc.data().end,
-              name: doc.data().name,
-              start: doc.data().start,
-              done: doc.data().done
-            });
-          });
-          console.log("eventsArr array is " + JSON.stringify(eventsArr));
-          console.log(self.events);
-          self.start = start;
-          self.end = end;
-          self.events = JSON.parse(JSON.stringify(eventsArr));
-        })
-        .catch(function(error) {
-          console.log("Error getting documents: ", error);
+      const querySnapshot = await db.collection("calEvent").get();
+      if (querySnapshot.empty) {
+        console.log("Error getting documents: ", querySnapshot);
+        return;
+      }
+      querySnapshot.forEach(doc => {
+        console.log("doc " + JSON.stringify(doc.data()));
+        eventsArr.push({
+          id: doc.id,
+          color: doc.data().color,
+          detail: doc.data().detail,
+          end: doc.data().end,
+          name: emulateStrikethrough(doc.data().name, doc.data().done),
+          start: doc.data().start,
+          done: doc.data().done
         });
+      });
+      console.log("eventsArr array is " + JSON.stringify(eventsArr));
+
+      this.start = start;
+      this.end = end;
+      this.events = JSON.parse(JSON.stringify(eventsArr));
+      console.log(this.events);
+      console.log(self.start);
     },
     getEventColor(ev) {
       return ev.color;
@@ -247,7 +260,7 @@ export default {
       console.log("show event ");
       console.log(nativeEvent);
       console.log(event);
-      this.textDecoration = this.defaultTextDecoration;
+
       const open = () => {
         this.selectedEvent = event;
         this.selectedElement = nativeEvent.target;
@@ -288,58 +301,73 @@ export default {
           self.events.splice(
             self.events.findIndex(event => event.id === self.selectedEvent.id)
           );
-        })
+         })
         .catch(function(error) {
           console.error("Error removing document: ", error);
         });
     },
-
     doneEvent() {
-      this.done = !this.done;
-      if (!localStorage.getItem(this.done))
-        localStorage.setItem(this.done, this.done);
-
-      //using strike overlay unicode
-      if (this.done) {
-        this.selectedEvent.name = this.selectedEvent.name
-          .split("")
-          .map(char => char + "\u0335")
-          .join("");
-        this.selectedEvent.detail = this.selectedEvent.detail
-          .split("")
-          .map(char => char + "\u0335")
-          .join("");
-      } else {
-        this.selectedEvent.name = this.selectedEvent.name.replace(
-          /[\u0335]/g,
-          ""
-        );
-        this.selectedEvent.detail = this.selectedEvent.detail.replace(
-          /[\u0335]/g,
-          ""
-        );
-      }
-      console.log("the done event");
+      console.log("done event this is ");
       console.log(this);
+      // console.log(localStorage.getItem(this.done));
+      //using strike overlay unicode
+      if (!this.selectedEvent.done) {
+        this.selectedEvent.name = emulateStrikethrough(
+          this.selectedEvent.name,
+          true
+        );
+        // this.selectedEvent.detail = this.selectedEvent.detail
+        //   .split("")
+        //   .map(char => char + "\u0335")
+        //   .join("");
 
-      // this.defaultTextDecoration = this.done ? "line-through" : "none";
-      // this.selectedElement.style.textDecoration = this.done
-      //   ? "line-through"
-      //   : "none";
+        this.selectedEvent.done = true;
+        console.log("____info:");
+        console.log(this.selectedEvent);
+        db.collection("calEvent")
+          .doc(this.selectedEvent.id)
+          .update({
+            done: true
+          })
+          .then(function() {
+            console.log("Document successfully updated!");
+          })
+          .catch(function(error) {
+            // The document probably doesn't exist.
+            console.error("Error updating document: ", error);
+          });
+      } else {
+        this.selectedEvent.name = emulateStrikethrough(
+          this.selectedEvent.name,
+          false
+        );
+        // this.selectedEvent.name = this.selectedEvent.name.replace(
+        //   /[\u0335]/g,
+        //   ""
+        // );
+        // this.selectedEvent.detail = this.selectedEvent.detail.replace(
+        //   /[\u0335]/g,
+        //   ""
+        // );
 
-      // if (this.defaultTextDecoration === "none") {
-      //   this.defaultTextDecoration = "line-through";
-      //   this.selectedElement.style.textDecoration = "line-through";
-      //   // this.defaultCompleteStatus = "UnDone";
-      // } else {
-      //   this.defaultTextDecoration = "none";
-      //   this.selectedElement.style.textDecoration = "none";
-      //   // this.defaultCompleteStatus = "Done";
-      // }
+        this.selectedEvent.done = false;
+        db.collection("calEvent")
+          .doc(this.selectedEvent.id)
+          .update({
+            done: false
+          })
+          .then(function() {
+            console.log("Document successfully updated!");
+          })
+          .catch(function(error) {
+            // The document probably doesn't exist.
+            console.error("Error updating document: ", error);
+          });
+      }
+      console.log("____info:");
+      console.log(this.selectedEvent);
+      console.log("the done event");
     }
-
-    //  pl-1 is name of the class but if you wanna traget them you need to go through some array
-    //  finding all the class pl-1 that has the smae content like "Izak"; -->
   }
 };
 </script>
