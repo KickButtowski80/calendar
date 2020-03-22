@@ -113,7 +113,7 @@
 <script>
 import db from "../main";
 import addEventForm from "../components/addEventForm";
-
+ 
 function emulateStrikethrough(string, hasStrike) {
   if (hasStrike) {
     return string
@@ -169,12 +169,13 @@ export default {
   created() {
     console.log("I am in created");
     console.log(this);
-   },
+  },
   mounted() {
     console.log("I am in mounted");
     this.$refs.calendar.checkChange();
     console.log(this);
   },
+  
   computed: {
     title() {
       const { start, end } = this;
@@ -238,7 +239,6 @@ export default {
       this.end = end;
       this.events = JSON.parse(JSON.stringify(eventsArr));
       console.log(this.events);
-      console.log(self.start);
     },
     getEventColor(ev) {
       return ev.color;
@@ -288,20 +288,20 @@ export default {
       console.log("add an event to events " + JSON.stringify(e));
       this.events.push(e);
     },
-    delEvent() {
-      let self = this;
-      console.log(self.selectedEvent.id);
+    delEvent() { 
+      console.log(this.selectedEvent.id);
       console.log(this.events);
       db.collection("calEvent")
-        .doc(self.selectedEvent.id)
+        .doc(this.selectedEvent.id)
         .delete()
         .then(() => {
           console.log("Document successfully deleted!");
-          self.selectedOpen = false;
-          self.events.splice(
-            self.events.findIndex(event => event.id === self.selectedEvent.id)
+          this.selectedOpen = false;
+          this.events.splice(
+            this.events.findIndex(event => event.id === this.selectedEvent.id),1
           );
-         })
+          console.log(this)
+        })
         .catch(function(error) {
           console.error("Error removing document: ", error);
         });
