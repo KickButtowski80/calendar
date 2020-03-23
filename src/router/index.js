@@ -1,14 +1,26 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Calendar from '../views/Calendar'
+import Home from '../views/Home'
+import DoneEventsList from '../views/DoneEventsList'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
+    name: 'Home',
+    component: Home
+  },
+  {
+    path: '/calendar',
     name: 'Calendar',
     component: Calendar
+  },
+  {
+    path: '/done-events-list',
+    name: 'DoneEventsList',
+    component: DoneEventsList
   },
   {
     path: '/about',
