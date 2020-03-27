@@ -1,10 +1,14 @@
 <template>
   <v-app>
-    <v-content>
+    <v-content class="mt-2">
       <router-link to="/" tag="span" style="cursor: pointer">
         <v-btn color="primary">Home</v-btn>
       </router-link>
-      <router-link to="/calendar" tag="span" style="cursor: pointer">
+      <router-link
+        :to="{ name: 'Calendar' }"
+        tag="span"
+        style="cursor: pointer"
+      >
         <v-btn color="primary">Calendar</v-btn>
       </router-link>
 
@@ -20,9 +24,10 @@
 <script>
 export default {
   name: "App",
-
-  components: {},
-
+ created(){
+    console.log("created")
+    this.$store.dispatch("fetchDoneEvents");
+  },
   data: () => ({})
 };
 </script>

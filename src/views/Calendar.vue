@@ -106,6 +106,9 @@
           </v-card>
         </v-menu>
       </v-sheet>
+      <v-btn color="success" v-on:click="saveDoneEvents"
+        >Save Done Events</v-btn
+      >
     </v-col>
   </v-row>
 </template>
@@ -113,7 +116,8 @@
 <script>
 import db from "../main";
 import addEventForm from "../components/addEventForm";
- 
+// import DoneEventsList from "../views/DoneEventsList"
+
 function emulateStrikethrough(string, hasStrike) {
   if (hasStrike) {
     return string
@@ -129,6 +133,7 @@ export default {
   name: "Calendar",
   components: {
     "add-event": addEventForm
+    // 'done-events-list': DoneEventsList
   },
   data() {
     return {
@@ -159,7 +164,10 @@ export default {
       selectedElement: null,
       selectedOpen: false, // if the dialog box is open or not
       events: [],
-      dialog: false
+      dialog: false,
+      // doneEvents: [],
+      //trying to stablish busEvent
+      count: 0
     };
   },
   beforeCreate() {
@@ -174,8 +182,9 @@ export default {
     console.log("I am in mounted");
     this.$refs.calendar.checkChange();
     console.log(this);
+   
   },
-  
+
   computed: {
     title() {
       const { start, end } = this;
@@ -288,7 +297,7 @@ export default {
       console.log("add an event to events " + JSON.stringify(e));
       this.events.push(e);
     },
-    delEvent() { 
+    delEvent() {
       console.log(this.selectedEvent.id);
       console.log(this.events);
       db.collection("calEvent")
@@ -298,9 +307,10 @@ export default {
           console.log("Document successfully deleted!");
           this.selectedOpen = false;
           this.events.splice(
-            this.events.findIndex(event => event.id === this.selectedEvent.id),1
+            this.events.findIndex(event => event.id === this.selectedEvent.id),
+            1
           );
-          console.log(this)
+          console.log(this);
         })
         .catch(function(error) {
           console.error("Error removing document: ", error);
@@ -324,6 +334,9 @@ export default {
         this.selectedEvent.done = true;
         console.log("____info:");
         console.log(this.selectedEvent);
+        // this.doneEvents.push(this.selectedEvent);
+        // this.$store.commit("pushEvent", this.selectedEvent)
+        this.$store.dispatch("pushEvent", this.selectedEvent);
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
           .update({
@@ -351,6 +364,14 @@ export default {
         // );
 
         this.selectedEvent.done = false;
+        // this.doneEvents.splice(
+        //   this.doneEvents.findIndex(
+        //     event => event.id === this.selectedEvent.id
+        //   ),
+        //   1
+        // );
+        // this.$store.commit('spliceEvent', this.selectedEvent.id)
+        this.$store.dispatch("spliceEvent", this.selectedEvent.id);
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
           .update({
@@ -366,7 +387,12 @@ export default {
       }
       console.log("____info:");
       console.log(this.selectedEvent);
+      console.log("------");     
       console.log("the done event");
+    },
+    saveDoneEvents() {
+      
+      this.$store.dispatch("saveDoneEvents", this.$store.getters.doneEvents);
     }
   }
 };
