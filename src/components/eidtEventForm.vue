@@ -1,34 +1,34 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="600px">
     <template v-slot:activator="{ on }">
-      <v-btn color="primary" dark v-on="on">Add Event</v-btn>
+      <v-btn text color="blue" dark v-on="on">Edit</v-btn>
     </template>
     <v-card>
       <v-card-title>
-        <span class="headline">Add an Event</span>
+        <span class="headline">Edit the Event</span>
       </v-card-title>
       <v-card-text>
         <v-container>
           <v-form ref="form">
             <v-row>
               <v-col cols="12">
-                <v-text-field label="Name*" v-model="name"></v-text-field>
+                <v-text-field label="Name*" v-model="event.name"></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-textarea label="detail" v-model="detail"></v-textarea>
+                <v-textarea label="detail" v-model="event.detail"></v-textarea>
               </v-col>
               <v-col cols="12">
                 <v-text-field
                   label="Start*"
                   :rules="dateRules"
-                  v-model="start"
+                  v-model="event.start"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-text-field
                   label="End*"
                   :rules="dateRules"
-                  v-model="end"
+                  v-model="event.end"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -39,15 +39,16 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="dialog = false">Cancel</v-btn>
-        <v-btn color="blue darken-1" text @click="onSaveChanges">Create</v-btn>
+        <v-btn color="blue darken-1" text @click="onSaveChanges">Edit</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 <script>
 import moment from "moment";
-import { calEventsCollection } from "../main";
+
 export default {
+  props: ["eventInfo"],
   data() {
     return {
       dialog: false,
@@ -60,41 +61,16 @@ export default {
         v =>
           moment(v, "YYYY-MM-DD", true).isValid() ||
           "Date format must be YYYY-MM-DD"
-      ]
+      ],
+      event: this.eventInfo
     };
   },
-
   methods: {
     onSaveChanges() {
       if (this.$refs.form.validate()) {
-        this.dialog = false; // Add a new document with a generated id.
-        const newEvent = {
-          name: this.name,
-          detail: this.detail,
-          start: this.start,
-          end: this.end,
-          color:
-            "#" +
-            Math.random()
-              .toString(16)
-              .slice(2, 8),
-          done: false
-        };
-        calEventsCollection
-          .add(newEvent)
-          .then((docRef) => {
-            console.log("Document written with ID: ", docRef.id);
-            this.$emit("addToEvents" , {...newEvent, id: docRef.id, done: false})
-          })
-          .catch(function(error) {
-            console.error("Error adding document: ", error);
-          });
+        this.dialog = false;
       }
     }
   }
 };
-
-// function getUniqueListBy(arr, key) {
-//     return [...new Map(arr.map(item => [item[key], item])).values()]
-// }
 </script>

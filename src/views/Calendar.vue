@@ -93,15 +93,16 @@
               </span>
             </v-card-text>
             <v-card-actions>
+              <edit-event :eventInfo="selectedEvent"></edit-event>
               <v-btn text color="green" @click="doneEvent">
                 {{ selectedEvent.done ? "unDone" : "Done" }}
               </v-btn>
               <v-btn text color="error" @click="delEvent">
                 Remove
               </v-btn>
-              <v-btn text color="secondary" @click="selectedOpen = false">
+              <!--v-btn text color="secondary" @click="selectedOpen = false">
                 Cancel
-              </v-btn>
+              </v-btn-->
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -116,7 +117,7 @@
 <script>
 import db from "../main";
 import addEventForm from "../components/addEventForm";
-// import DoneEventsList from "../views/DoneEventsList"
+import editEventForm from "../components/eidtEventForm";
 
 function emulateStrikethrough(string, hasStrike) {
   if (hasStrike) {
@@ -132,8 +133,8 @@ function emulateStrikethrough(string, hasStrike) {
 export default {
   name: "Calendar",
   components: {
-    "add-event": addEventForm
-    // 'done-events-list': DoneEventsList
+    "add-event": addEventForm,
+    "edit-event": editEventForm
   },
   data() {
     return {
@@ -182,7 +183,6 @@ export default {
     console.log("I am in mounted");
     this.$refs.calendar.checkChange();
     console.log(this);
-   
   },
 
   computed: {
@@ -242,7 +242,7 @@ export default {
           done: doc.data().done
         });
       });
-      console.log("eventsArr array is " + JSON.stringify(eventsArr));
+      // console.log("eventsArr array is " + JSON.stringify(eventsArr));
 
       this.start = start;
       this.end = end;
@@ -387,13 +387,13 @@ export default {
       }
       console.log("____info:");
       console.log(this.selectedEvent);
-      console.log("------");     
+      console.log("------");
       console.log("the done event");
     },
     saveDoneEvents() {
-      
       this.$store.dispatch("saveDoneEvents", this.$store.getters.doneEvents);
-    }
+    },
+    editEvent() {}
   }
 };
 </script>

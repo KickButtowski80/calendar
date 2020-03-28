@@ -16,6 +16,15 @@
         <v-btn color="primary">Done Events</v-btn>
       </router-link>
 
+      <v-btn
+        color="success"
+        tag="span"
+        style="cursor: pointer"
+        v-show="check4Params"
+      >
+        {{ this.$route.params.name }}
+      </v-btn>
+
       <router-view></router-view>
     </v-content>
   </v-app>
@@ -24,10 +33,24 @@
 <script>
 export default {
   name: "App",
- created(){
-    console.log("created")
+  created() {
+    console.log("created");
     this.$store.dispatch("fetchDoneEvents");
   },
-  data: () => ({})
+  data: () => ({}),
+  computed: {
+    check4Params() {
+      return typeof this.$route.params.name !== "undefined" ? true : false;
+    }
+  }
 };
 </script>
+<style lang="scss">
+.router-link-exact-active .theme--light.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+  background-color: #4caf50 !important ;
+}
+
+.theme--light.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) button {
+  background-color: #4caf50 !important ;
+}
+</style>

@@ -1,5 +1,6 @@
 <template>
   <div>
+  
     <v-card class="mt-5 mb-5" max-width="344">
       <v-card-text>
         <p class="title text--primary">
@@ -17,6 +18,9 @@
 export default {
   name: "DoneEvent",
   props: ["name"],
+  created() {
+    console.log(this)
+  },
   computed: {
     doneEvent() {
       return this.$store.getters.doneEvent(this.name);

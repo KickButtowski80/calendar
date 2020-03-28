@@ -1,11 +1,11 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import db from "../main";
- import VuexPersistence from "vuex-persist";
+//  import VuexPersistence from "vuex-persist";
 Vue.use(Vuex);
-const vuexLocal = new VuexPersistence({
-  storage: window.localStorage
-});
+// const vuexLocal = new VuexPersistence({
+//   storage: window.localStorage
+// });
 
 export default new Vuex.Store({
   state: {
@@ -47,7 +47,7 @@ export default new Vuex.Store({
           const doneEvetns = [];
           querySnapshot.forEach(doc => {
             const numberOfKeys = Object.keys(doc.data()).length;
-            console.log(JSON.stringify(doc.data()))
+            // console.log(JSON.stringify(doc.data()))
             if (numberOfKeys !== 0) {
               doneEvetns.push({ ...doc.data() });
             }
@@ -56,8 +56,7 @@ export default new Vuex.Store({
           context.commit("setDoneEvents", doneEvetns);
         })
         .catch(error => {
-          console.log(error);
-          // context.commit('setLoading', true)
+          console.log(error); 
         });
     },
     pushEvent({ commit }, payload) {
@@ -73,5 +72,5 @@ export default new Vuex.Store({
     }
   },
   modules: {},
-  plugins: [vuexLocal.plugin]
+  // plugins: [vuexLocal.plugin]
 });
