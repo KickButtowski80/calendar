@@ -33,9 +33,15 @@
 <script>
 export default {
   name: "App",
-  created() {
-    console.log("created");
-    this.$store.dispatch("fetchDoneEvents");
+
+  mounted(){
+
+  },
+  beforeDestroy() {
+    alert("before destroy")
+    // if(localStorage.getItem("finishEvent")){
+    //   localStorage.clear()
+    // }
   },
   data: () => ({}),
   computed: {

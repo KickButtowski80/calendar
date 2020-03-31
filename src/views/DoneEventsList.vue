@@ -2,7 +2,7 @@
   <div>
     <v-card
       v-for="event in doneEventList"
-      :key="event.color"
+      :key="`${event.name}-${event.start}-${event.end}`"
       class="mt-5 mb-5"
       max-width="344"
     >
@@ -15,12 +15,18 @@
         </div>
       </v-card-text>
       <v-card-actions>
-        <v-btn text color="deep-purple accent-4" 
-        v-bind:to="'/done-events-list/'+ event.name">
+        <v-btn
+          text
+          color="deep-purple accent-4"
+          v-bind:to="'/done-events-list/' + event.name"
+        >
           Read More
         </v-btn>
       </v-card-actions>
     </v-card>
+    <div>
+      {{ doneEventList }}
+    </div>
   </div>
 </template>
 <script>
@@ -38,15 +44,18 @@ export default {
   mounted() {
     console.log("I am in done events list mounting");
     console.log(this.$store.getters.doneEvents);
-  //   console.log(localStorage.vuex["doneEvents"])
-  //   if(localStorage.vuex){
-  //     console.log("done event list local storage")
-  //     this.doneEventList={...localStorage.vuex}
-  //   }
+    this.doneEventList = localStorage.getItem("finishEvent");
+    //   console.log(localStorage.vuex["doneEvents"])
+    //   if(localStorage.vuex){
+    //     console.log("done event list local storage")
+    //     this.doneEventList={...localStorage.vuex}
+    //   }
+    console.log("local storage part is ");
+    console.log(JSON.parse(this.doneEventList));
   },
   data() {
     return {
-      doneEventList: this.$store.getters.doneEvents
+      doneEventList: JSON.parse(localStorage.getItem("finishEvent"))
     };
   },
   methods: {
@@ -62,4 +71,3 @@ export default {
   display: inline-block;
 }
 </style>
-

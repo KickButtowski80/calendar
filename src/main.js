@@ -36,10 +36,22 @@ firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore();
 export default db;
 export const calEventsCollection = db.collection("calEvent");
-
+window.addEventListener('beforeunload', function (e) {
+  e.preventDefault();
+  e.returnValue = '  ';
+  localStorage.clear()
+  return ''
+});
 new Vue({
   router,
   store,
   vuetify,
-  render: h => h(App)
+  render: h => h(App),
+
+  created() {
+    console.log("created in main vue");
+    store.dispatch("fetchDoneEvents");
+ 
+  } 
+  
 }).$mount("#app");

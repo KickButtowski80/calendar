@@ -100,9 +100,7 @@
               <v-btn text color="error" @click="delEvent">
                 Remove
               </v-btn>
-              <!--v-btn text color="secondary" @click="selectedOpen = false">
-                Cancel
-              </v-btn-->
+              
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -117,7 +115,7 @@
 <script>
 import db from "../main";
 import addEventForm from "../components/addEventForm";
-import editEventForm from "../components/eidtEventForm";
+import editEventForm from "../components/editEventForm";
 
 function emulateStrikethrough(string, hasStrike) {
   if (hasStrike) {
@@ -174,6 +172,9 @@ export default {
   beforeCreate() {
     console.log("before create");
     console.log(this);
+  },
+  beforeDestroy(){
+    console.log("before destroy")
   },
   created() {
     console.log("I am in created");
@@ -337,6 +338,13 @@ export default {
         // this.doneEvents.push(this.selectedEvent);
         // this.$store.commit("pushEvent", this.selectedEvent)
         this.$store.dispatch("pushEvent", this.selectedEvent);
+        let finishEventLS = localStorage.getItem("finishEvent");
+        console.log("finsisheEventLS");
+        console.log(finishEventLS);
+        finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
+        finishEventLS.push(this.selectedEvent);
+        localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
+
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
           .update({
@@ -372,6 +380,14 @@ export default {
         // );
         // this.$store.commit('spliceEvent', this.selectedEvent.id)
         this.$store.dispatch("spliceEvent", this.selectedEvent.id);
+
+        let finishEventLS = localStorage.getItem("finishEvent");
+        console.log("finsisheEventLS");
+        console.log(finishEventLS);
+        finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
+        finishEventLS.splice(finishEventLS.findIndex(event => event.name === this.selectedEvent.name),1);
+        localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
+
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
           .update({
