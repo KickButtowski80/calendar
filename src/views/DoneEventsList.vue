@@ -38,13 +38,16 @@ export default {
   //         required: true
   //     }
   // },
-  created() {
+  beforeCreate() {
     console.log("created");
+    console.log(localStorage)
+  
+    alert(JSON.stringify(this.doneEventList))
   },
   mounted() {
     console.log("I am in done events list mounting");
     console.log(this.$store.getters.doneEvents);
-    this.doneEventList = localStorage.getItem("finishEvent");
+    
     //   console.log(localStorage.vuex["doneEvents"])
     //   if(localStorage.vuex){
     //     console.log("done event list local storage")
@@ -52,6 +55,7 @@ export default {
     //   }
     console.log("local storage part is ");
     console.log(JSON.parse(this.doneEventList));
+      this.doneEventList = JSON.parse(localStorage.getItem("finishEvent"));
   },
   data() {
     return {

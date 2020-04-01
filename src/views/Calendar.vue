@@ -93,14 +93,18 @@
               </span>
             </v-card-text>
             <v-card-actions>
-              <edit-event :eventInfo="selectedEvent"></edit-event>
+              <edit-event
+                :eventInfo="selectedEvent"
+                @editedEvent="editedEventinEvents"
+              >
+              </edit-event>
+           
               <v-btn text color="green" @click="doneEvent">
                 {{ selectedEvent.done ? "unDone" : "Done" }}
               </v-btn>
               <v-btn text color="error" @click="delEvent">
                 Remove
               </v-btn>
-              
             </v-card-actions>
           </v-card>
         </v-menu>
@@ -173,8 +177,8 @@ export default {
     console.log("before create");
     console.log(this);
   },
-  beforeDestroy(){
-    console.log("before destroy")
+  beforeDestroy() {
+    console.log("before destroy");
   },
   created() {
     console.log("I am in created");
@@ -248,6 +252,7 @@ export default {
       this.start = start;
       this.end = end;
       this.events = JSON.parse(JSON.stringify(eventsArr));
+      localStorage.setItem("allEvents", JSON.stringify(eventsArr));
       console.log(this.events);
     },
     getEventColor(ev) {
@@ -297,6 +302,9 @@ export default {
     addanEventToEvents(e) {
       console.log("add an event to events " + JSON.stringify(e));
       this.events.push(e);
+    },
+    editedEventinEvents(e) {
+      alert("edited an event to events "  + JSON.stringify(e) );
     },
     delEvent() {
       console.log(this.selectedEvent.id);
@@ -385,7 +393,12 @@ export default {
         console.log("finsisheEventLS");
         console.log(finishEventLS);
         finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
-        finishEventLS.splice(finishEventLS.findIndex(event => event.name === this.selectedEvent.name),1);
+        finishEventLS.splice(
+          finishEventLS.findIndex(
+            event => event.name === this.selectedEvent.name
+          ),
+          1
+        );
         localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
 
         db.collection("calEvent")

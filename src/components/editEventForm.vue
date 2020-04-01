@@ -34,7 +34,7 @@
             </v-row>
           </v-form>
         </v-container>
-        <small>*indicates required field</small>
+        <small>*indicates required field {{ eventInfo.name }}</small>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -46,7 +46,7 @@
 </template>
 <script>
 import moment from "moment";
-
+import { calEventsCollection } from "../main";
 export default {
   props: ["eventInfo"],
   data() {
@@ -69,6 +69,35 @@ export default {
     onSaveChanges() {
       if (this.$refs.form.validate()) {
         this.dialog = false;
+       
+        // this.$store.dispatch("updateEventData", {
+        //   name: this.name,
+        //   detail: this.detail,
+        //   start: this.start,
+        //   end: this.end,
+        //   done: this.done
+        // });
+        calEventsCollection
+          .doc(this.eventInfo.id)
+          .update({
+            name: this.eventInfo.name,
+            detail: this.eventInfo.detail,
+            start: this.eventInfo.start,
+            end: this.eventInfo.end
+          })
+          .then(function() {
+            console.log("Document successfully updated!");
+            this.$emit("editedEvent", {
+              name: this.eventInfo.name,
+              detail: this.eventInfo.detail,
+              start: this.eventInfo.start,
+              end: this.eventInfo.end
+            });
+          })
+          .catch(function(error) {
+            // The document probably doesn't exist.
+            console.error("Error updating document: ", error);
+          });
       }
     }
   }
