@@ -47,6 +47,7 @@
 <script>
 import moment from "moment";
 import { calEventsCollection } from "../main";
+ 
 export default {
   props: ["eventInfo"],
   data() {
@@ -69,30 +70,21 @@ export default {
     onSaveChanges() {
       if (this.$refs.form.validate()) {
         this.dialog = false;
-       
-        // this.$store.dispatch("updateEventData", {
-        //   name: this.name,
-        //   detail: this.detail,
-        //   start: this.start,
-        //   end: this.end,
-        //   done: this.done
-        // });
-        calEventsCollection
-          .doc(this.eventInfo.id)
-          .update({
+        let updatedEvent = {
             name: this.eventInfo.name,
             detail: this.eventInfo.detail,
             start: this.eventInfo.start,
             end: this.eventInfo.end
-          })
-          .then(function() {
+          }
+          alert(JSON.stringify(updatedEvent))
+        calEventsCollection
+          .doc(this.eventInfo.id)
+          .update(updatedEvent)
+          .then(() => {
             console.log("Document successfully updated!");
-            this.$emit("editedEvent", {
-              name: this.eventInfo.name,
-              detail: this.eventInfo.detail,
-              start: this.eventInfo.start,
-              end: this.eventInfo.end
-            });
+            console.log(this);
+            
+            this.$store.dispatch("updateEventData", updatedEvent);
           })
           .catch(function(error) {
             // The document probably doesn't exist.

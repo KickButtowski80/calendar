@@ -44,7 +44,7 @@
           ref="calendar"
           v-model="focus"
           color="primary"
-          :events="events"
+          :events="allEvents"
           :event-color="getEventColor"
           :now="today"
           :type="type"
@@ -98,7 +98,7 @@
                 @editedEvent="editedEventinEvents"
               >
               </edit-event>
-           
+
               <v-btn text color="green" @click="doneEvent">
                 {{ selectedEvent.done ? "unDone" : "Done" }}
               </v-btn>
@@ -109,9 +109,6 @@
           </v-card>
         </v-menu>
       </v-sheet>
-      <v-btn color="success" v-on:click="saveDoneEvents"
-        >Save Done Events</v-btn
-      >
     </v-col>
   </v-row>
 </template>
@@ -125,7 +122,7 @@ function emulateStrikethrough(string, hasStrike) {
   if (hasStrike) {
     return string
       .split("")
-      .map(char => char + "\u0335")
+      .map((char) => char + "\u0335")
       .join("");
   } else {
     return string.replace(/[\u0335]/g, "");
@@ -136,7 +133,7 @@ export default {
   name: "Calendar",
   components: {
     "add-event": addEventForm,
-    "edit-event": editEventForm
+    "edit-event": editEventForm,
   },
   data() {
     return {
@@ -155,22 +152,22 @@ export default {
         month: "Month",
         week: "Week",
         day: "Day",
-        "4day": "4 Days"
+        "4day": "4 Days",
       },
       name: null,
       details: null,
-      start: null,
-      end: null,
+      // start: null,
+      // end: null,
       color: "",
       currentlyEditing: null, //id goes here? what id, we will see
       selectedEvent: {},
       selectedElement: null,
       selectedOpen: false, // if the dialog box is open or not
-      events: [],
+      // events: [],
       dialog: false,
       // doneEvents: [],
       //trying to stablish busEvent
-      count: 0
+      count: 0,
     };
   },
   beforeCreate() {
@@ -191,8 +188,15 @@ export default {
   },
 
   computed: {
+    allEvents() {
+      return this.$store.getters.events;
+    },
     title() {
-      const { start, end } = this;
+      //  const { start, end } = this;
+      const start = this.$store.getters.start;
+      const end = this.$store.getters.end;
+      console.log("I am in title");
+      console.log(start + " " + end);
       if (!start || !end) {
         return "wrong";
       }
@@ -222,38 +226,15 @@ export default {
     monthFormatter() {
       return this.$refs.calendar.getFormatter({
         timeZone: "UTC",
-        month: "long"
+        month: "long",
       });
-    }
+    },
   },
   methods: {
-    async getEvents({ start, end }) {
-      console.log("start date is" + JSON.stringify(start));
-      let eventsArr = [];
-      const querySnapshot = await db.collection("calEvent").get();
-      if (querySnapshot.empty) {
-        console.log("Error getting documents: ", querySnapshot);
-        return;
-      }
-      querySnapshot.forEach(doc => {
-        console.log("doc " + JSON.stringify(doc.data()));
-        eventsArr.push({
-          id: doc.id,
-          color: doc.data().color,
-          detail: doc.data().detail,
-          end: doc.data().end,
-          name: emulateStrikethrough(doc.data().name, doc.data().done),
-          start: doc.data().start,
-          done: doc.data().done
-        });
-      });
-      // console.log("eventsArr array is " + JSON.stringify(eventsArr));
-
-      this.start = start;
-      this.end = end;
-      this.events = JSON.parse(JSON.stringify(eventsArr));
-      localStorage.setItem("allEvents", JSON.stringify(eventsArr));
-      console.log(this.events);
+    getEvents() {
+      const start = this.$store.state.start;
+      const end = this.$store.state.end;
+      this.$store.dispatch("fetchEvents", { start, end });
     },
     getEventColor(ev) {
       return ev.color;
@@ -301,34 +282,22 @@ export default {
     },
     addanEventToEvents(e) {
       console.log("add an event to events " + JSON.stringify(e));
-      this.events.push(e);
-    },
-    editedEventinEvents(e) {
-      alert("edited an event to events "  + JSON.stringify(e) );
+      this.$store.dispatch("pushEvent", e);
     },
     delEvent() {
-      console.log(this.selectedEvent.id);
-      console.log(this.events);
       db.collection("calEvent")
         .doc(this.selectedEvent.id)
         .delete()
         .then(() => {
           console.log("Document successfully deleted!");
           this.selectedOpen = false;
-          this.events.splice(
-            this.events.findIndex(event => event.id === this.selectedEvent.id),
-            1
-          );
-          console.log(this);
+          this.$store.dispatch("spliceEvent", this.selectedEvent.id);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.error("Error removing document: ", error);
         });
     },
     doneEvent() {
-      console.log("done event this is ");
-      console.log(this);
-      // console.log(localStorage.getItem(this.done));
       //using strike overlay unicode
       if (!this.selectedEvent.done) {
         this.selectedEvent.name = emulateStrikethrough(
@@ -341,14 +310,10 @@ export default {
         //   .join("");
 
         this.selectedEvent.done = true;
-        console.log("____info:");
-        console.log(this.selectedEvent);
-        // this.doneEvents.push(this.selectedEvent);
-        // this.$store.commit("pushEvent", this.selectedEvent)
-        this.$store.dispatch("pushEvent", this.selectedEvent);
+
+        this.$store.dispatch("pushDoneEvent", this.selectedEvent);
         let finishEventLS = localStorage.getItem("finishEvent");
-        console.log("finsisheEventLS");
-        console.log(finishEventLS);
+
         finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
         finishEventLS.push(this.selectedEvent);
         localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
@@ -356,12 +321,12 @@ export default {
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
           .update({
-            done: true
+            done: true,
           })
-          .then(function() {
+          .then(function () {
             console.log("Document successfully updated!");
           })
-          .catch(function(error) {
+          .catch(function (error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
           });
@@ -387,7 +352,7 @@ export default {
         //   1
         // );
         // this.$store.commit('spliceEvent', this.selectedEvent.id)
-        this.$store.dispatch("spliceEvent", this.selectedEvent.id);
+        this.$store.dispatch("spliceDoneEvent", this.selectedEvent.id);
 
         let finishEventLS = localStorage.getItem("finishEvent");
         console.log("finsisheEventLS");
@@ -395,7 +360,7 @@ export default {
         finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
         finishEventLS.splice(
           finishEventLS.findIndex(
-            event => event.name === this.selectedEvent.name
+            (event) => event.name === this.selectedEvent.name
           ),
           1
         );
@@ -404,13 +369,12 @@ export default {
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
           .update({
-            done: false
+            done: false,
           })
-          .then(function() {
+          .then(function () {
             console.log("Document successfully updated!");
           })
-          .catch(function(error) {
-            // The document probably doesn't exist.
+          .catch(function (error) {
             console.error("Error updating document: ", error);
           });
       }
@@ -419,11 +383,7 @@ export default {
       console.log("------");
       console.log("the done event");
     },
-    saveDoneEvents() {
-      this.$store.dispatch("saveDoneEvents", this.$store.getters.doneEvents);
-    },
-    editEvent() {}
-  }
+  },
 };
 </script>
 

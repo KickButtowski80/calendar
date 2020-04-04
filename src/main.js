@@ -34,6 +34,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore();
+ 
+
 export default db;
 export const calEventsCollection = db.collection("calEvent");
 
@@ -52,6 +54,7 @@ new Vue({
   created() {
     console.log("created in main vue");
     store.dispatch("fetchDoneEvents"); 
+   
   } 
   
 }).$mount("#app");
