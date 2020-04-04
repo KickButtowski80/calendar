@@ -80,6 +80,7 @@ export default new Vuex.Store({
   },
   actions: {
     async fetchEvents(context, { start, end }) {
+      alert(start + " " + end)
       // if (!localStorage.getItem("allEvents")) {
       alert("fetching events");
       console.log("start date is" + JSON.stringify(start));

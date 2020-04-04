@@ -94,8 +94,7 @@
             </v-card-text>
             <v-card-actions>
               <edit-event
-                :eventInfo="selectedEvent"
-                @editedEvent="editedEventinEvents"
+                :eventInfo="selectedEvent" 
               >
               </edit-event>
 
@@ -231,9 +230,9 @@ export default {
     },
   },
   methods: {
-    getEvents() {
-      const start = this.$store.state.start;
-      const end = this.$store.state.end;
+    getEvents({start, end }) {
+      // const start = this.$store.state.start;
+      // const end = this.$store.state.end;
       this.$store.dispatch("fetchEvents", { start, end });
     },
     getEventColor(ev) {
