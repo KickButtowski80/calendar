@@ -33,10 +33,6 @@
 <script>
 export default {
   name: "App",
-
-  mounted(){
-
-  },
   beforeDestroy() {
     alert("before destroy")
     // if(localStorage.getItem("finishEvent")){

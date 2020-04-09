@@ -39,35 +39,32 @@ export default {
   //     }
   // },
   beforeCreate() {
-    console.log("created");
-    console.log(localStorage)
   
-    alert(JSON.stringify(this.doneEventList))
   },
-  mounted() {
-    console.log("I am in done events list mounting");
-    console.log(this.$store.getters.doneEvents);
-    
-    //   console.log(localStorage.vuex["doneEvents"])
-    //   if(localStorage.vuex){
-    //     console.log("done event list local storage")
-    //     this.doneEventList={...localStorage.vuex}
-    //   }
-    console.log("local storage part is ");
-    console.log(JSON.parse(this.doneEventList));
-      this.doneEventList = JSON.parse(localStorage.getItem("finishEvent"));
+
+  created() {
+   
   },
   data() {
     return {
-      doneEventList: JSON.parse(localStorage.getItem("finishEvent"))
+      // The data method is only fired once during initialization,
+      //  before the computed properties are set up. So, referencing
+      //   currentArea from within the data method won't work as it will 
+      //   be undefined at the time of execution.
+      // // doneEventList: null,
     };
+  },
+  computed: {
+    doneEventList() {
+      return this.$store.getters.doneEvents;
+    },
   },
   methods: {
     shortenDetail(detail) {
       if (detail.length >= 10) return detail.slice(0, 9) + "...";
       else return detail;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="css" scoped>

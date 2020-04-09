@@ -13,6 +13,16 @@ function emulateStrikethrough(string, hasStrike) {
     return string.replace(/[\u0335]/g, "");
   }
 }
+const asyncLocalStorage = {
+  async setItem(key, value) {
+    null;
+    return localStorage.setItem(key, value);
+  },
+  getItem: async function(key) {
+    null;
+    return localStorage.getItem(key);
+  },
+};
 export default new Vuex.Store({
   state: {
     doneEvents: [],
@@ -79,41 +89,44 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    async fetchEvents(context, { start, end }) {
-      alert(start + " " + end)
-      // if (!localStorage.getItem("allEvents")) {
-      alert("fetching events");
-      console.log("start date is" + JSON.stringify(start));
-      var eventsArr = [];
-      const querySnapshot = await db.collection("calEvent").get();
-      if (querySnapshot.empty) {
-        console.log("Error getting documents: ", querySnapshot);
-        return;
-      }
-      querySnapshot.forEach((doc) => {
-        console.log("doc " + JSON.stringify(doc.data()));
-        eventsArr.push({
-          id: doc.id,
-          color: doc.data().color,
-          detail: doc.data().detail,
-          end: doc.data().end,
-          name: emulateStrikethrough(doc.data().name, doc.data().done),
-          start: doc.data().start,
-          done: doc.data().done,
+    async fetchEvents(context) {
+      if (!localStorage.getItem("allEvents")) {
+        // alert(JSON.stringify(start) + " " + JSON.stringify(end)); //
+        alert("fetching events");
+        // console.log("start date is" + JSON.stringify(start));
+        var eventsArr = [];
+        //wait is gonna return a promise
+        const querySnapshot = await db.collection("calEvent").get();
+       
+        if (querySnapshot.empty) {
+          console.log("Error getting documents: ", querySnapshot);
+          return;
+        }
+        querySnapshot.forEach((doc) => {
+          console.log("doc " + JSON.stringify(doc.data()));
+          eventsArr.push({
+            id: doc.id,
+            color: doc.data().color,
+            detail: doc.data().detail,
+            end: doc.data().end,
+            name: emulateStrikethrough(doc.data().name, doc.data().done),
+            start: doc.data().start,
+            done: doc.data().done,
+          });
         });
-      });
-
-      context.commit("setStart", start);
-      context.commit("setEnd", end);
-      context.commit("setEvents", eventsArr);
-      localStorage.setItem("allEvents", JSON.stringify(eventsArr));
-      // } else {
-      //   alert("event are in localstorage ");
-      //    context.commit(
-      //     "setEvents",
-      //     JSON.parse(localStorage.getItem("allEvent"))
-      //   );
-      // }
+        context.commit("setEvents", eventsArr);
+        localStorage.setItem("allEvents", JSON.stringify(eventsArr));
+      } else {
+        asyncLocalStorage
+          .getItem("allEvents")
+          .then(function() {
+            return localStorage.getItem("allEvents");
+          })
+          .then(function(value) {
+            context.commit("setEvents", JSON.parse(value));
+            alert("fine");
+          });
+      }
     },
     fetchDoneEvents(context) {
       //check up here for if statment
@@ -141,10 +154,15 @@ export default new Vuex.Store({
             console.log(error);
           });
       } else {
-        context.commit(
-          "setDoneEvents",
-          JSON.parse(localStorage.getItem("finishEvent"))
-        );
+        asyncLocalStorage
+        .getItem("finishEvent")
+        .then(function() {
+          return localStorage.getItem("finishEvent");
+        })
+        .then(function(value) {
+          context.commit("setDoneEvents", JSON.parse(value));
+          alert("fine 4 done events");
+        });
         alert("done events is already in local storage");
       }
     },
@@ -167,6 +185,12 @@ export default new Vuex.Store({
     },
     updateEventData({ commit }, payload) {
       commit("updateEvent", payload);
+    },
+    setStart({ commit }, payload) {
+      commit("setStart", payload);
+    },
+    setEnd({ commit }, payload) {
+      commit("setEnd", payload);
     },
   },
   modules: {},

@@ -42,7 +42,8 @@ export const calEventsCollection = db.collection("calEvent");
 window.addEventListener('beforeunload', function (e) {
   e.preventDefault();
   e.returnValue = '  ';
-  // localStorage.removeItem("finishEvent")
+  localStorage.removeItem("finishEvent")
+  localStorage.removeItem("allEvents")
   return ''
 });
 new Vue({

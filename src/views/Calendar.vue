@@ -13,7 +13,7 @@
           <v-btn fab text small color="grey darken-2" @click="next">
             <v-icon small>mdi-chevron-right</v-icon>
           </v-btn>
-          <v-toolbar-title>{{ title }}</v-toolbar-title>
+          <v-toolbar-title>{{ monthTitle }}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-menu bottom right>
             <template v-slot:activator="{ on }">
@@ -93,10 +93,7 @@
               </span>
             </v-card-text>
             <v-card-actions>
-              <edit-event
-                :eventInfo="selectedEvent" 
-              >
-              </edit-event>
+              <edit-event :eventInfo="selectedEvent"> </edit-event>
 
               <v-btn text color="green" @click="doneEvent">
                 {{ selectedEvent.done ? "unDone" : "Done" }}
@@ -136,6 +133,7 @@ export default {
   },
   data() {
     return {
+      monthTitle: "Loading Calendar...",
       today: new Date(
         new Date().getTime() - new Date().getTimezoneOffset() * 60000
       )
@@ -155,17 +153,14 @@ export default {
       },
       name: null,
       details: null,
-      // start: null,
-      // end: null,
+      start: null,
+      end: null,
       color: "",
       currentlyEditing: null, //id goes here? what id, we will see
       selectedEvent: {},
       selectedElement: null,
       selectedOpen: false, // if the dialog box is open or not
-      // events: [],
       dialog: false,
-      // doneEvents: [],
-      //trying to stablish busEvent
       count: 0,
     };
   },
@@ -191,17 +186,16 @@ export default {
       return this.$store.getters.events;
     },
     title() {
-      //  const { start, end } = this;
-      const start = this.$store.getters.start;
-      const end = this.$store.getters.end;
+      const { start, end } = this.$store.state;
+
       console.log("I am in title");
       console.log(start + " " + end);
       if (!start || !end) {
         return "wrong";
       }
-
       const startMonth = this.monthFormatter(start);
       const endMonth = this.monthFormatter(end);
+      console.warn("STARTEND: ", startMonth, endMonth);
       const suffixMonth = startMonth === endMonth ? "" : endMonth;
 
       const startYear = start.year;
@@ -223,6 +217,7 @@ export default {
       return "";
     },
     monthFormatter() {
+      console.warn(this.$refs);
       return this.$refs.calendar.getFormatter({
         timeZone: "UTC",
         month: "long",
@@ -230,10 +225,19 @@ export default {
     },
   },
   methods: {
-    getEvents({start, end }) {
-      // const start = this.$store.state.start;
-      // const end = this.$store.state.end;
+    getEvents({ start, end }) {
+      /*  Since, I am waiting for setStart,setEnd, and fetchEvents
+    to return some values and make the start and end availabe
+    for the title , this why ? we use this.monthTitle = this.title 
+    at the end so  I am waiting for the value of start and end to be returned?*/
+
+      // disptach is async
       this.$store.dispatch("fetchEvents", { start, end });
+      // do not we need to use actions here ????
+      this.$store.dispatch("setStart", start);
+      this.$store.dispatch("setEnd", end);
+      //this.title is computed property
+      this.monthTitle = this.title;
     },
     getEventColor(ev) {
       return ev.color;
@@ -292,7 +296,7 @@ export default {
           this.selectedOpen = false;
           this.$store.dispatch("spliceEvent", this.selectedEvent.id);
         })
-        .catch(function (error) {
+        .catch(function(error) {
           console.error("Error removing document: ", error);
         });
     },
@@ -322,10 +326,10 @@ export default {
           .update({
             done: true,
           })
-          .then(function () {
+          .then(function() {
             console.log("Document successfully updated!");
           })
-          .catch(function (error) {
+          .catch(function(error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
           });
@@ -370,10 +374,10 @@ export default {
           .update({
             done: false,
           })
-          .then(function () {
+          .then(function() {
             console.log("Document successfully updated!");
           })
-          .catch(function (error) {
+          .catch(function(error) {
             console.error("Error updating document: ", error);
           });
       }
