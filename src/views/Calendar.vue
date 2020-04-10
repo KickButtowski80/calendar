@@ -124,7 +124,16 @@ function emulateStrikethrough(string, hasStrike) {
     return string.replace(/[\u0335]/g, "");
   }
 }
-
+const asyncLocalStorage = {
+  async setItem(key, value) {
+    null;
+    return localStorage.setItem(key, value);
+  },
+  getItem: async function(key) {
+    null;
+    return localStorage.getItem(key);
+  },
+};
 export default {
   name: "Calendar",
   components: {
@@ -314,12 +323,25 @@ export default {
 
         this.selectedEvent.done = true;
 
-        this.$store.dispatch("pushDoneEvent", this.selectedEvent);
-        let finishEventLS = localStorage.getItem("finishEvent");
+        //  let finishEventLS = localStorage.getItem("finishEvent");
 
-        finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
-        finishEventLS.push(this.selectedEvent);
-        localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
+        // finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
+        // finishEventLS.push(this.selectedEvent);
+        // localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
+        asyncLocalStorage
+          .getItem("finishEvent")
+          .then(() => {
+            return JSON.parse(localStorage.getItem("finishEvent"));
+          })
+          .then((value) => {
+            value.push(this.selectedEvent);
+            // this.$store.dispatch("pushDoneEvent", this.selectedEvent);
+             this.$store.dispatch("setDoneEvents", value);
+            return value;
+          })
+          .then((value) => {
+            localStorage.setItem("finishEvent", JSON.stringify(value));
+          });
 
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
@@ -348,26 +370,25 @@ export default {
         // );
 
         this.selectedEvent.done = false;
-        // this.doneEvents.splice(
-        //   this.doneEvents.findIndex(
-        //     event => event.id === this.selectedEvent.id
-        //   ),
-        //   1
-        // );
-        // this.$store.commit('spliceEvent', this.selectedEvent.id)
-        this.$store.dispatch("spliceDoneEvent", this.selectedEvent.id);
 
-        let finishEventLS = localStorage.getItem("finishEvent");
-        console.log("finsisheEventLS");
-        console.log(finishEventLS);
-        finishEventLS = finishEventLS ? JSON.parse(finishEventLS) : [];
-        finishEventLS.splice(
-          finishEventLS.findIndex(
-            (event) => event.name === this.selectedEvent.name
-          ),
-          1
-        );
-        localStorage.setItem("finishEvent", JSON.stringify(finishEventLS));
+        asyncLocalStorage
+          .getItem("finishEvent")
+          .then(function() {
+            return JSON.parse(localStorage.getItem("finishEvent"));
+          })
+          .then((value) => {
+            value.splice(
+              value.findIndex(
+                (event) => event.name === this.selectedEvent.name
+              ),
+              1
+            );
+            this.$store.dispatch("spliceDoneEvent", this.selectedEvent.id);
+            return value;
+          })
+          .then((value) => {
+            localStorage.setItem("finishEvent", JSON.stringify(value));
+          });
 
         db.collection("calEvent")
           .doc(this.selectedEvent.id)
@@ -381,10 +402,7 @@ export default {
             console.error("Error updating document: ", error);
           });
       }
-      console.log("____info:");
-      console.log(this.selectedEvent);
-      console.log("------");
-      console.log("the done event");
+     
     },
   },
 };

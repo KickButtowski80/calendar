@@ -24,32 +24,17 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-    <div>
-      {{ doneEventList }}
-    </div>
+    <div></div>
   </div>
 </template>
 <script>
 export default {
   name: "DoneEventsList",
-  // props:{
-  //     doneEventsList:{
-  //         type: Array,
-  //         required: true
-  //     }
-  // },
-  beforeCreate() {
-  
-  },
-
-  created() {
-   
-  },
   data() {
     return {
       // The data method is only fired once during initialization,
       //  before the computed properties are set up. So, referencing
-      //   currentArea from within the data method won't work as it will 
+      //   currentArea from within the data method won't work as it will
       //   be undefined at the time of execution.
       // // doneEventList: null,
     };

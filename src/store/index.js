@@ -166,6 +166,9 @@ export default new Vuex.Store({
         alert("done events is already in local storage");
       }
     },
+    setDoneEvents({ commit }, payload) {
+      commit("setDoneEvents", payload)
+    },
     pushEvent({ commit }, payload) {
       commit("pushEvent", payload);
     },
