@@ -59,15 +59,3 @@ new Vue({
   } 
   
 }).$mount("#app");
-
-// You can use it for more than authentication, navigation guards can guard against a 
-// multitude of things - one of which could be making sure you have data populated. 
-// You could do something like this:
-// router.beforeEach(async (to, from, next) => {
-//   // make sure we always have job openings
-//   if (store.state.jobOpenings.length === 0) {
-//     await store.dispatch('loadJobOpenings')
-//   } else {
-//     next()
-//   }
-// })

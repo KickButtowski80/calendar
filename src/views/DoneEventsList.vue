@@ -36,7 +36,7 @@ export default {
       //  before the computed properties are set up. So, referencing
       //   currentArea from within the data method won't work as it will
       //   be undefined at the time of execution.
-      // // doneEventList: null,
+      //  doneEventList: null,
     };
   },
   computed: {
